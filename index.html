@@ -5,37 +5,37 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>♡</title>
+
 <style>
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
 
 body {
   margin: 0;
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #080d18;
-  color: #e8edff;
+  background: #f5f2ff;
+  color: #62538f;
   font-family: Georgia, serif;
   overflow: hidden;
 }
 
 main {
-  text-align: center;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 24px;
-  width: 100%;
+  text-align: center;
 }
 
 h1 {
-  font-size: clamp(28px, 7vw, 43px);
+  font-size: clamp(28px, 7vw, 40px);
   font-weight: normal;
-  margin-bottom: 14px;
-}
-
-p {
-  color: #aebcde;
-  font-size: 17px;
-  margin-bottom: 30px;
+  margin: 0 0 25px;
 }
 
 .gif {
@@ -43,8 +43,7 @@ p {
   width: min(220px, 65vw);
   max-height: 220px;
   object-fit: contain;
-  margin: 0 auto 28px;
-  border-radius: 12px;
+  margin: 0 auto 30px;
 }
 
 .buttons {
@@ -52,35 +51,57 @@ p {
   justify-content: center;
   align-items: center;
   gap: 18px;
-  min-height: 65px;
+  min-height: 55px;
 }
 
 button {
-  border: 1px solid #536caa;
-  border-radius: 12px;
-  padding: 13px 28px;
-  font-size: 16px;
+  padding: 12px 27px;
+  border: 0;
+  border-radius: 20px;
+  font: 16px Georgia, serif;
   cursor: pointer;
-  transition: transform 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  outline: none;
 }
 
 #yes {
-  background: #a9c4ff;
-  color: #080d18;
+  background: #b9a8f5;
+  color: white;
+  transition: transform 0.25s ease;
+  position: relative;
+  z-index: 2;
 }
 
 #no {
-  background: transparent;
-  color: #e8edff;
+  background: white;
+  color: #7767a6;
+  border: 1px solid #ded5fa;
+  position: fixed;
+  left: 50%;
+  top: calc(50% + 45px);
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  transition: left 0.12s ease, top 0.12s ease;
 }
 
-#second { display: none; }
+#no:focus,
+#no:active {
+  background: white;
+  color: #7767a6;
+  outline: none;
+}
+
+#second {
+  display: none;
+}
 
 .confetti {
   position: fixed;
-  top: -20px;
+  top: -15px;
   width: 9px;
-  height: 13px;
+  height: 12px;
   pointer-events: none;
   animation: fall 3s linear forwards;
   z-index: 10;
@@ -88,30 +109,31 @@ button {
 
 @keyframes fall {
   to {
-    transform: translateY(110vh) rotate(900deg);
+    transform: translateY(110vh) rotate(720deg);
     opacity: 0;
   }
 }
 </style>
 </head>
+
 <body>
 
 <main id="first">
-  <h1>i love you so much ♡</h1>
-  <p>do you love me back?</p>
+  <h1>do you love me? ♡</h1>
 
-  <img class="gif" src="https://tenor.com/fUrhmn5pOYP.gif" alt="">
+  <img class="gif" src="https://tenor.com/en-GB/view/milk-and-mocha-milk-and-mocha-bear-gif-8604663346218614199" alt="">
 
   <div class="buttons" id="buttons">
     <button id="yes">yes ♡</button>
-    <button id="no">no</button>
   </div>
+
+  <button id="no">no</button>
 </main>
 
 <main id="second">
   <h1>YAYYYY I LOVE YOU MORE ♡</h1>
 
-  <img class="gif" src="https://tenor.com/kpNB1IeLOkt.gif" alt="">
+  <img class="gif" src="https://tenor.com/en-GB/view/milk-and-mocha-crying-sad-gif-18191419" alt="">
 </main>
 
 <script>
@@ -119,36 +141,64 @@ let size = 1;
 
 const yes = document.getElementById("yes");
 const no = document.getElementById("no");
-const buttons = document.getElementById("buttons");
 
-no.addEventListener("click", () => {
-  size = Math.min(size + 0.15, 2.5);
+function moveNo() {
+  const margin = 12;
+  const w = no.offsetWidth;
+  const h = no.offsetHeight;
+
+  const maxX = window.innerWidth - w - margin;
+  const maxY = window.innerHeight - h - margin;
+
+  let x, y;
+  const yesRect = yes.getBoundingClientRect();
+  const safe = 14;
+
+  do {
+    x = margin + Math.random() * Math.max(0, maxX - margin);
+    y = margin + Math.random() * Math.max(0, maxY - margin);
+  } while (
+    x < yesRect.right + safe &&
+    x + w > yesRect.left - safe &&
+    y < yesRect.bottom + safe &&
+    y + h > yesRect.top - safe
+  );
+
+  no.style.left = x + "px";
+  no.style.top = y + "px";
+  no.style.transform = "none";
+}
+
+no.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  size = Math.min(size + 0.12, 2.5);
   yes.style.transform = `scale(${size})`;
-
-  buttons.style.flexDirection =
-    Math.random() > 0.5 ? "row-reverse" : "row";
-
-  no.textContent = size >= 2.5 ? "are you sure? ♡" : "no";
+  moveNo();
 });
+
+window.addEventListener("resize", moveNo);
 
 yes.addEventListener("click", () => {
   document.getElementById("first").style.display = "none";
-  document.getElementById("second").style.display = "block";
+  no.style.display = "none";
+  document.getElementById("second").style.display = "flex";
 
   for (let i = 0; i < 150; i++) {
     const piece = document.createElement("div");
     piece.className = "confetti";
     piece.style.left = Math.random() * 100 + "vw";
     piece.style.backgroundColor = [
-      "#a9c4ff", "#f5b7d2", "#ffffff",
-      "#b8a5ff", "#83e6d0"
+      "#b9a8f5", "#e8bce8", "#ffffff",
+      "#d5c8ff", "#f6cce0"
     ][Math.floor(Math.random() * 5)];
-    piece.style.animationDelay = Math.random() * 1.5 + "s";
+    piece.style.animationDelay = Math.random() * 1.2 + "s";
     piece.style.animationDuration = (2 + Math.random() * 2) + "s";
     document.body.appendChild(piece);
     setTimeout(() => piece.remove(), 5000);
   }
 });
+
+moveNo();
 </script>
 
 </body>
