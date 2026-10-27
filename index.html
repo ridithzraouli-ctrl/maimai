@@ -65,20 +65,19 @@ button {
   outline: none;
 }
 
-#yes, #yes2 {
+#yes, #no {
+  transition: transform 0.2s ease;
+}
+
+#yes {
   background: #b9a8f5;
   color: white;
-  position: relative;
-  z-index: 2;
-  transition: transform 0.2s ease;
 }
 
 #no {
   background: white;
   color: #7767a6;
   border: 1px solid #ded5fa;
-  transition: left 0.12s ease, top 0.12s ease,
-              transform 0.2s ease;
 }
 
 #no:focus, #no:active {
@@ -91,6 +90,7 @@ button {
 }
 
 #tiny {
+  display: none;
   position: fixed;
   bottom: 13px;
   left: 0;
@@ -124,7 +124,7 @@ button {
 <main id="first">
   <h1>do you love me? ♡</h1>
 
-  <img class="gif" src="milk-and-mocha-crying.gif" alt="">
+  <img class="gif" src="khóc.gif" alt="">
 
   <div class="buttons" id="buttons">
     <button id="yes">yes ♡</button>
@@ -136,7 +136,6 @@ button {
 
 <main id="second">
   <h1>YAYYYY I LOVE YOU MORE ♡</h1>
-
   <img class="gif" src="milk-and-mocha-milk-and-mocha-bear.gif" alt="">
 </main>
 
@@ -146,7 +145,8 @@ const no = document.getElementById("no");
 const buttons = document.getElementById("buttons");
 
 let size = 1;
-let maxPresses = 0;
+let growthPresses = 0;
+let extraPresses = 0;
 let yesMode = false;
 
 function moveNo() {
@@ -174,7 +174,6 @@ function moveNo() {
   no.style.position = "fixed";
   no.style.left = x + "px";
   no.style.top = y + "px";
-  no.style.transform = "none";
 }
 
 no.addEventListener("click", () => {
@@ -183,29 +182,35 @@ no.addEventListener("click", () => {
     return;
   }
 
-  if (maxPresses < 3) {
-    maxPresses++;
+  if (growthPresses < 3) {
+    growthPresses++;
     size += 0.35;
     yes.style.transform = `scale(${size})`;
     moveNo();
     return;
   }
 
-  if (maxPresses >= 3) {
-    no.dataset.extra = (Number(no.dataset.extra || 0) + 1);
-    no.textContent = "no";
+  extraPresses++;
 
-    if (Number(no.dataset.extra) >= 3) {
-      yesMode = true;
-      yes.style.transform = "scale(1)";
-      yes.textContent = "yes ♡";
-      no.textContent = "yes ♡";
-      no.style.background = "#b9a8f5";
-      no.style.color = "white";
-      no.style.border = "none";
-    } else {
-      moveNo();
-    }
+  if (extraPresses >= 3) {
+    yesMode = true;
+
+    no.style.position = "static";
+    no.style.left = "";
+    no.style.top = "";
+    no.style.transform = "";
+    yes.style.transform = "";
+    buttons.style.flexDirection = "row";
+
+    yes.textContent = "yes ♡";
+    no.textContent = "yes ♡";
+    no.style.background = "#b9a8f5";
+    no.style.color = "white";
+    no.style.border = "none";
+
+    document.getElementById("tiny").style.display = "block";
+  } else {
+    moveNo();
   }
 });
 
@@ -214,7 +219,6 @@ yes.addEventListener("click", showLove);
 function showLove() {
   document.getElementById("first").style.display = "none";
   document.getElementById("tiny").style.display = "none";
-  no.style.display = "none";
   document.getElementById("second").style.display = "flex";
 
   for (let i = 0; i < 150; i++) {
