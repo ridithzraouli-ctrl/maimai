@@ -28,14 +28,14 @@ main {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 20px;
   text-align: center;
 }
 
 h1 {
   font-size: clamp(28px, 7vw, 40px);
   font-weight: normal;
-  margin: 0 0 25px;
+  margin: 0 0 24px;
 }
 
 .gif {
@@ -43,15 +43,15 @@ h1 {
   width: min(220px, 65vw);
   max-height: 220px;
   object-fit: contain;
-  margin: 0 auto 30px;
+  margin: 0 auto 28px;
 }
 
 .buttons {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   gap: 18px;
-  min-height: 55px;
+  min-height: 60px;
 }
 
 button {
@@ -60,41 +60,44 @@ button {
   border-radius: 20px;
   font: 16px Georgia, serif;
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   user-select: none;
   outline: none;
 }
 
-#yes {
+#yes, #yes2 {
   background: #b9a8f5;
   color: white;
-  transition: transform 0.25s ease;
   position: relative;
   z-index: 2;
+  transition: transform 0.2s ease;
 }
 
 #no {
   background: white;
   color: #7767a6;
   border: 1px solid #ded5fa;
-  position: fixed;
-  left: 50%;
-  top: calc(50% + 45px);
-  transform: translate(-50%, -50%);
-  z-index: 3;
-  transition: left 0.12s ease, top 0.12s ease;
+  transition: left 0.12s ease, top 0.12s ease,
+              transform 0.2s ease;
 }
 
-#no:focus,
-#no:active {
+#no:focus, #no:active {
   background: white;
   color: #7767a6;
-  outline: none;
 }
 
 #second {
   display: none;
+}
+
+#tiny {
+  position: fixed;
+  bottom: 13px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 11px;
+  color: #a99bd5;
 }
 
 .confetti {
@@ -121,65 +124,98 @@ button {
 <main id="first">
   <h1>do you love me? ♡</h1>
 
-  <img class="gif" src="https://tenor.com/en-GB/view/milk-and-mocha-milk-and-mocha-bear-gif-8604663346218614199" alt="">
+  <!-- Put your first downloaded GIF in this folder -->
+  <img class="gif" src="sad.gif" alt="">
 
   <div class="buttons" id="buttons">
     <button id="yes">yes ♡</button>
+    <button id="no">no</button>
   </div>
-
-  <button id="no">no</button>
 </main>
+
+<div id="tiny">idc if it's unfair🙄🙄</div>
 
 <main id="second">
   <h1>YAYYYY I LOVE YOU MORE ♡</h1>
 
-  <img class="gif" src="https://tenor.com/en-GB/view/milk-and-mocha-crying-sad-gif-18191419" alt="">
+  <!-- Put your second downloaded GIF in this folder -->
+  <img class="gif" src="happy.gif" alt="">
 </main>
 
 <script>
-let size = 1;
-
 const yes = document.getElementById("yes");
 const no = document.getElementById("no");
+const buttons = document.getElementById("buttons");
+
+let size = 1;
+let maxPresses = 0;
+let yesMode = false;
 
 function moveNo() {
   const margin = 12;
   const w = no.offsetWidth;
   const h = no.offsetHeight;
-
   const maxX = window.innerWidth - w - margin;
   const maxY = window.innerHeight - h - margin;
-
-  let x, y;
   const yesRect = yes.getBoundingClientRect();
-  const safe = 14;
+
+  let x, y, attempts = 0;
 
   do {
     x = margin + Math.random() * Math.max(0, maxX - margin);
     y = margin + Math.random() * Math.max(0, maxY - margin);
+    attempts++;
   } while (
-    x < yesRect.right + safe &&
-    x + w > yesRect.left - safe &&
-    y < yesRect.bottom + safe &&
-    y + h > yesRect.top - safe
+    attempts < 100 &&
+    x < yesRect.right + 12 &&
+    x + w > yesRect.left - 12 &&
+    y < yesRect.bottom + 12 &&
+    y + h > yesRect.top - 12
   );
 
+  no.style.position = "fixed";
   no.style.left = x + "px";
   no.style.top = y + "px";
   no.style.transform = "none";
 }
 
-no.addEventListener("pointerdown", (e) => {
-  e.preventDefault();
-  size = Math.min(size + 0.12, 2.5);
-  yes.style.transform = `scale(${size})`;
-  moveNo();
+no.addEventListener("click", () => {
+  if (yesMode) {
+    showLove();
+    return;
+  }
+
+  if (maxPresses < 3) {
+    maxPresses++;
+    size += 0.35;
+    yes.style.transform = `scale(${size})`;
+    moveNo();
+    return;
+  }
+
+  if (maxPresses >= 3) {
+    no.dataset.extra = (Number(no.dataset.extra || 0) + 1);
+    no.textContent = "no";
+
+    if (Number(no.dataset.extra) >= 3) {
+      yesMode = true;
+      yes.style.transform = "scale(1)";
+      yes.textContent = "yes ♡";
+      no.textContent = "yes ♡";
+      no.style.background = "#b9a8f5";
+      no.style.color = "white";
+      no.style.border = "none";
+    } else {
+      moveNo();
+    }
+  }
 });
 
-window.addEventListener("resize", moveNo);
+yes.addEventListener("click", showLove);
 
-yes.addEventListener("click", () => {
+function showLove() {
   document.getElementById("first").style.display = "none";
+  document.getElementById("tiny").style.display = "none";
   no.style.display = "none";
   document.getElementById("second").style.display = "flex";
 
@@ -196,9 +232,11 @@ yes.addEventListener("click", () => {
     document.body.appendChild(piece);
     setTimeout(() => piece.remove(), 5000);
   }
-});
+}
 
-moveNo();
+window.addEventListener("resize", () => {
+  if (no.style.position === "fixed" && !yesMode) moveNo();
+});
 </script>
 
 </body>
